@@ -86,8 +86,11 @@ const sendTransaction = async (provider: IProvider): Promise<any> => {
     });
 
     // data for the transaction
-    const destination = "0x40e1c367Eca34250cAF1bc8330E9EddfD403fC56";
-    const amount = parseEther("0.0001");
+    const destination = process.env
+      .NEXT_PUBLIC_TRANSACTION_DESTINATION! as `0x${string}`;
+    const amount = parseEther(
+      process.env.NEXT_PUBLIC_TRANSACTION_AMOUNT_VIEM || "0.0001"
+    );
     const address = await walletClient.getAddresses();
 
     // Submit transaction to the blockchain
@@ -117,7 +120,8 @@ const signMessage = async (provider: IProvider): Promise<any> => {
 
     // data for signing
     const address = await walletClient.getAddresses();
-    const originalMessage = "YOUR_MESSAGE";
+    const originalMessage =
+      process.env.NEXT_PUBLIC_SIGN_MESSAGE || "YOUR_MESSAGE";
 
     // Sign the message
     const hash = await walletClient.signMessage({
@@ -133,10 +137,12 @@ const signMessage = async (provider: IProvider): Promise<any> => {
   }
 };
 
-export default {
+const RPC = {
   getChainId,
   getAccounts,
   getBalance,
   sendTransaction,
   signMessage,
 };
+
+export default RPC;

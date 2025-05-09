@@ -53,7 +53,8 @@ const signMessage = async (provider: IProvider): Promise<string> => {
     // Get user's Ethereum public address
     const fromAddress = (await web3.eth.getAccounts())[0];
 
-    const originalMessage = "YOUR_MESSAGE";
+    const originalMessage =
+      process.env.NEXT_PUBLIC_SIGN_MESSAGE || "YOUR_MESSAGE";
 
     // Sign the message
     const signedMessage = await web3.eth.personal.sign(
@@ -87,10 +88,15 @@ const sendTransaction = async (provider: IProvider): Promise<any> => {
       );
     }
 
-    const amount = web3.utils.toWei("0.001", "ether"); // Convert 1 ether to wei
+    const amount = web3.utils.toWei(
+      process.env.NEXT_PUBLIC_TRANSACTION_AMOUNT || "0.001",
+      "ether"
+    ); // Convert to wei
+    const destination =
+      process.env.NEXT_PUBLIC_TRANSACTION_DESTINATION || address;
     let transaction = {
       from: address,
-      to: address,
+      to: destination,
       data: "0x",
       value: amount,
     };
@@ -113,10 +119,12 @@ const sendTransaction = async (provider: IProvider): Promise<any> => {
   }
 };
 
-export default {
+const RPC = {
   getChainId,
   getAccounts,
   getBalance,
   sendTransaction,
   signMessage,
 };
+
+export default RPC;

@@ -37,26 +37,24 @@ import RPC from "./web3RPC";
 // IMP END - Blockchain Calls
 
 // IMP START - Dashboard Registration
-const web3AuthClientId =
-  "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ"; // get from https://dashboard.web3auth.io
+const web3AuthClientId = process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID!;
 // IMP END - Dashboard Registration
 
 // IMP START - Verifier Creation
-const verifier = "w3a-firebase-demo";
+const verifier = process.env.NEXT_PUBLIC_WEB3AUTH_VERIFIER!;
 // IMP END - Verifier Creation
 
 // IMP START - Chain Config
 const chainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
-  chainId: "0xaa36a7",
-  rpcTarget:
-    "https://eth-sepolia.g.alchemy.com/v2/HG0QWro5aeI5ml7ya5H7gEXhWMS0MOgV",
+  chainId: process.env.NEXT_PUBLIC_CHAIN_ID!,
+  rpcTarget: process.env.NEXT_PUBLIC_RPC_TARGET!,
   // Avoid using public rpcTarget in production.
   // Use services like Infura, Quicknode etc
-  displayName: "Ethereum Sepolia Testnet",
-  blockExplorerUrl: "https://sepolia.etherscan.io",
-  ticker: "ETH",
-  tickerName: "Ethereum",
+  displayName: process.env.NEXT_PUBLIC_CHAIN_NAME!,
+  blockExplorerUrl: process.env.NEXT_PUBLIC_BLOCK_EXPLORER_URL!,
+  ticker: process.env.NEXT_PUBLIC_TICKER!,
+  tickerName: process.env.NEXT_PUBLIC_TICKER_NAME!,
   logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
 };
 // IMP END - Chain Config
@@ -68,7 +66,10 @@ let evmProvider: EthereumSigningProvider;
 if (typeof window !== "undefined") {
   coreKitInstance = new Web3AuthMPCCoreKit({
     web3AuthClientId,
-    web3AuthNetwork: WEB3AUTH_NETWORK.MAINNET,
+    web3AuthNetwork:
+      process.env.NEXT_PUBLIC_WEB3AUTH_NETWORK === "mainnet"
+        ? WEB3AUTH_NETWORK.MAINNET
+        : WEB3AUTH_NETWORK.DEVNET,
     storage: window.localStorage,
     manualSync: true, // This is the recommended approach
     tssLib,
@@ -83,12 +84,12 @@ if (typeof window !== "undefined") {
 // IMP START - Auth Provider Login
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyB0nd9YsPLu-tpdCrsXn8wgsWVAiYEpQ_E",
-  authDomain: "web3auth-oauth-logins.firebaseapp.com",
-  projectId: "web3auth-oauth-logins",
-  storageBucket: "web3auth-oauth-logins.appspot.com",
-  messagingSenderId: "461819774167",
-  appId: "1:461819774167:web:e74addfb6cc88f3b5b9c92",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 // IMP END - Auth Provider Login
 

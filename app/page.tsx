@@ -1,9 +1,8 @@
 "use client";
 import { tssLib } from "@toruslabs/tss-dkls-lib";
-import { ADAPTER_EVENTS, CHAIN_NAMESPACES } from "@web3auth/base";
+import { CHAIN_NAMESPACES } from "@web3auth/base";
 import { EthereumSigningProvider } from "@web3auth/ethereum-mpc-provider";
 import { Point, secp256k1 } from "@tkey/common-types";
-// IMP START - Quick Start
 import {
   COREKIT_STATUS,
   FactorKeyTypeShareDescription,
@@ -18,7 +17,6 @@ import {
   Web3AuthMPCCoreKit,
 } from "@web3auth/mpc-core-kit";
 import { BN } from "bn.js";
-// Firebase libraries for custom authentication
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
@@ -29,20 +27,13 @@ import {
 } from "firebase/auth";
 import { useEffect, useState } from "react";
 
-// IMP END - Quick Start
-// IMP START - Blockchain Calls
 // import RPC from "./ethersRPC";
 // import RPC from "./viemRPC";
 import RPC from "./web3RPC";
-// IMP END - Blockchain Calls
 
-// IMP START - Dashboard Registration
 const web3AuthClientId = process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID!;
-// IMP END - Dashboard Registration
 
-// IMP START - Verifier Creation
 const verifier = process.env.NEXT_PUBLIC_WEB3AUTH_VERIFIER!;
-// IMP END - Verifier Creation
 
 // IMP START - Chain Config
 const chainConfig = {
@@ -99,6 +90,7 @@ function App() {
   );
   const [backupFactorKey, setBackupFactorKey] = useState<string>("");
   const [mnemonicFactor, setMnemonicFactor] = useState<string>("");
+  const [importEoaMnemonic, setImportEoaMnemonic] = useState<string>("");
 
   // Firebase Initialisation
   const app = initializeApp(firebaseConfig);
@@ -143,11 +135,23 @@ function App() {
       // IMP END - Auth Provider Login
 
       // IMP START - Login
-      const idTokenLoginParams = {
+      const idTokenLoginParams: JWTLoginParams = {
         verifier,
         verifierId: parsedToken.sub,
         idToken,
-      } as JWTLoginParams;
+      };
+
+      // インポートするEOAニーモニックがある場合、秘密鍵に変換して設定
+      if (importEoaMnemonic.trim()) {
+        try {
+          uiConsole("Converting mnemonic to private key for importing...");
+          const privateKey = mnemonicToKey(importEoaMnemonic.trim());
+          idTokenLoginParams.importTssKey = privateKey;
+          uiConsole("EOA private key prepared for import");
+        } catch (err) {
+          uiConsole("Failed to convert mnemonic to private key:", err);
+        }
+      }
 
       await coreKitInstance.loginWithJWT(idTokenLoginParams);
       if (coreKitInstance.status === COREKIT_STATUS.LOGGED_IN) {
@@ -468,9 +472,32 @@ function App() {
 
   const unloggedInView = (
     <div className="flex-container">
-      <button onClick={login} className="card">
-        Login
-      </button>
+      <div>
+        <h3>標準ログイン</h3>
+        <button onClick={login} className="card">
+          Login
+        </button>
+      </div>
+      <div>
+        <h3>EOAをインポートしてログイン</h3>
+        <div>
+          <label>EOAニーモニックを入力:</label>
+          <input
+            value={importEoaMnemonic}
+            onChange={(e) => setImportEoaMnemonic(e.target.value)}
+            placeholder="12または24単語のニーモニックフレーズ"
+            className="full-width"
+            style={{ width: "100%", marginBottom: "10px" }}
+          />
+          <button
+            onClick={login}
+            className="card"
+            disabled={!importEoaMnemonic.trim()}
+          >
+            EOAをインポートしてログイン
+          </button>
+        </div>
+      </div>
       <div
         className={
           coreKitStatus === COREKIT_STATUS.REQUIRED_SHARE ? "" : "disabledDiv"

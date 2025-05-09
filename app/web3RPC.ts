@@ -82,7 +82,9 @@ const sendTransaction = async (provider: IProvider): Promise<any> => {
     );
 
     if (balance === "0") {
-      throw new Error("Insufficient balance, please fund your account to use this");
+      throw new Error(
+        "Insufficient balance, please fund your account to use this"
+      );
     }
 
     const amount = web3.utils.toWei("0.001", "ether"); // Convert 1 ether to wei
@@ -94,7 +96,10 @@ const sendTransaction = async (provider: IProvider): Promise<any> => {
     };
 
     // calculate gas transaction before sending
-    transaction = { ...transaction, gas: await web3.eth.estimateGas(transaction) } as any;
+    transaction = {
+      ...transaction,
+      gas: await web3.eth.estimateGas(transaction),
+    } as any;
 
     // Submit transaction to the blockchain and wait for it to be mined
     const receipt = await web3.eth.sendTransaction(transaction);
@@ -108,4 +113,10 @@ const sendTransaction = async (provider: IProvider): Promise<any> => {
   }
 };
 
-export default { getChainId, getAccounts, getBalance, sendTransaction, signMessage };
+export default {
+  getChainId,
+  getAccounts,
+  getBalance,
+  sendTransaction,
+  signMessage,
+};

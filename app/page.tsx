@@ -1,6 +1,5 @@
 "use client";
 import { tssLib } from "@toruslabs/tss-dkls-lib";
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import { ADAPTER_EVENTS, CHAIN_NAMESPACES } from "@web3auth/base";
 import { EthereumSigningProvider } from "@web3auth/ethereum-mpc-provider";
 import { Point, secp256k1 } from "@tkey/common-types";
@@ -21,7 +20,13 @@ import {
 import { BN } from "bn.js";
 // Firebase libraries for custom authentication
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, UserCredential } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  UserCredential,
+} from "firebase/auth";
 import { useEffect, useState } from "react";
 
 // IMP END - Quick Start
@@ -32,7 +37,8 @@ import RPC from "./web3RPC";
 // IMP END - Blockchain Calls
 
 // IMP START - Dashboard Registration
-const web3AuthClientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ"; // get from https://dashboard.web3auth.io
+const web3AuthClientId =
+  "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ"; // get from https://dashboard.web3auth.io
 // IMP END - Dashboard Registration
 
 // IMP START - Verifier Creation
@@ -43,7 +49,8 @@ const verifier = "w3a-firebase-demo";
 const chainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   chainId: "0xaa36a7",
-  rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+  rpcTarget:
+    "https://eth-sepolia.g.alchemy.com/v2/HG0QWro5aeI5ml7ya5H7gEXhWMS0MOgV",
   // Avoid using public rpcTarget in production.
   // Use services like Infura, Quicknode etc
   displayName: "Ethereum Sepolia Testnet",
@@ -86,7 +93,9 @@ const firebaseConfig = {
 // IMP END - Auth Provider Login
 
 function App() {
-  const [coreKitStatus, setCoreKitStatus] = useState<COREKIT_STATUS>(COREKIT_STATUS.NOT_INITIALIZED);
+  const [coreKitStatus, setCoreKitStatus] = useState<COREKIT_STATUS>(
+    COREKIT_STATUS.NOT_INITIALIZED
+  );
   const [backupFactorKey, setBackupFactorKey] = useState<string>("");
   const [mnemonicFactor, setMnemonicFactor] = useState<string>("");
 
@@ -194,7 +203,11 @@ function App() {
 
       // Login using Firebase Email Password
       const auth = getAuth(app);
-      const res = await signInWithEmailAndPassword(auth, "custom+jwt@firebase.login", "Testing@123");
+      const res = await signInWithEmailAndPassword(
+        auth,
+        "custom+jwt@firebase.login",
+        "Testing@123"
+      );
       uiConsole(res);
       const idToken = await res.user.getIdToken(true);
       const userInfo = parseToken(idToken);
@@ -227,7 +240,10 @@ function App() {
     try {
       const factorKey = new BN(await getSocialMFAFactorKey(), "hex");
       uiConsole("Using the Social Factor Key to Enable MFA, please wait...");
-      await coreKitInstance.enableMFA({ factorKey, shareDescription: FactorKeyTypeShareDescription.SocialShare });
+      await coreKitInstance.enableMFA({
+        factorKey,
+        shareDescription: FactorKeyTypeShareDescription.SocialShare,
+      });
 
       if (coreKitInstance.status === COREKIT_STATUS.LOGGED_IN) {
         await coreKitInstance.commitChanges();
@@ -245,7 +261,9 @@ function App() {
   // IMP START - Delete Factor
   const deleteFactor = async () => {
     let factorPub: string | undefined;
-    for (const [key, value] of Object.entries(coreKitInstance.getKeyDetails().shareDescriptions)) {
+    for (const [key, value] of Object.entries(
+      coreKitInstance.getKeyDetails().shareDescriptions
+    )) {
       if (value.length > 0) {
         const parsedData = JSON.parse(value[0]);
         if (parsedData.module === FactorKeyTypeShareDescription.SocialShare) {
@@ -254,7 +272,11 @@ function App() {
       }
     }
     if (factorPub) {
-      uiConsole("Deleting Social Factor, please wait...", "Factor Pub:", factorPub);
+      uiConsole(
+        "Deleting Social Factor, please wait...",
+        "Factor Pub:",
+        factorPub
+      );
       const pub = Point.fromSEC1(secp256k1, factorPub);
       await coreKitInstance.deleteFactor(pub);
       await coreKitInstance.commitChanges();
@@ -293,7 +315,9 @@ function App() {
       factorKey: factorKey.private,
       shareDescription: FactorKeyTypeShareDescription.SeedPhrase,
     });
-    const factorKeyMnemonic = await keyToMnemonic(factorKey.private.toString("hex"));
+    const factorKeyMnemonic = await keyToMnemonic(
+      factorKey.private.toString("hex")
+    );
     if (coreKitInstance.status === COREKIT_STATUS.LOGGED_IN) {
       await coreKitInstance.commitChanges();
     }
@@ -373,7 +397,6 @@ function App() {
     logout();
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function uiConsole(...args: any): void {
     const el = document.querySelector("#console>p");
     if (el) {
@@ -447,13 +470,23 @@ function App() {
       <button onClick={login} className="card">
         Login
       </button>
-      <div className={coreKitStatus === COREKIT_STATUS.REQUIRED_SHARE ? "" : "disabledDiv"}>
+      <div
+        className={
+          coreKitStatus === COREKIT_STATUS.REQUIRED_SHARE ? "" : "disabledDiv"
+        }
+      >
         <button onClick={() => getDeviceFactor()} className="card">
           Get Device Factor
         </button>
         <label>Recover Using Mnemonic Factor Key:</label>
-        <input value={mnemonicFactor} onChange={(e) => setMnemonicFactor(e.target.value)}></input>
-        <button onClick={() => MnemonicToFactorKeyHex(mnemonicFactor)} className="card">
+        <input
+          value={mnemonicFactor}
+          onChange={(e) => setMnemonicFactor(e.target.value)}
+        ></input>
+        <button
+          onClick={() => MnemonicToFactorKeyHex(mnemonicFactor)}
+          className="card"
+        >
           Get Recovery Factor Key using Mnemonic
         </button>
         <button onClick={() => getSocialMFAFactorKey()} className="card">
@@ -473,13 +506,21 @@ function App() {
   return (
     <div className="container">
       <h1 className="title">
-        <a target="_blank" href="https://web3auth.io/docs/sdk/core-kit/mpc-core-kit/" rel="noreferrer">
+        <a
+          target="_blank"
+          href="https://web3auth.io/docs/sdk/core-kit/mpc-core-kit/"
+          rel="noreferrer"
+        >
           Web3Auth MPC Core Kit
         </a>{" "}
         Nextjs Quick Start
       </h1>
 
-      <div className="grid">{coreKitStatus === COREKIT_STATUS.LOGGED_IN ? loggedInView : unloggedInView}</div>
+      <div className="grid">
+        {coreKitStatus === COREKIT_STATUS.LOGGED_IN
+          ? loggedInView
+          : unloggedInView}
+      </div>
       <div id="console" style={{ whiteSpace: "pre-line" }}>
         <p style={{ whiteSpace: "pre-line" }}></p>
       </div>
